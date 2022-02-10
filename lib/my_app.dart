@@ -1,4 +1,6 @@
-import 'package:coin_flutter/pages/coins_page.dart';
+// ignore_for_file: prefer_const_constructors
+
+import 'package:coin_flutter/pages/home_page.dart';
 import 'package:flutter/material.dart';
 
 class MyApp extends StatelessWidget {
@@ -12,8 +14,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.deepPurple,
       ),
-      // ignore: prefer_const_constructors
-      home: CoinsPage(),
+      home: HomePage(),
     );
   }
 }
