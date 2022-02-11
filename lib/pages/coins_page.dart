@@ -5,6 +5,7 @@ import 'package:coin_flutter/pages/coins_detail_page.dart';
 import 'package:coin_flutter/repositories/coin_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class CoinsPage extends StatefulWidget {
   const CoinsPage({Key? key}) : super(key: key);
@@ -14,7 +15,8 @@ class CoinsPage extends StatefulWidget {
 }
 
 class _CoinsPageState extends State<CoinsPage> {
-  final table = CoinRepository.table;
+  late List<Coin> table;
+  late CoinRepository coins;
   NumberFormat real = NumberFormat.currency(locale: 'pt_BR', name: 'R\$');
   List<Coin> selected = [];
 
@@ -28,6 +30,9 @@ class _CoinsPageState extends State<CoinsPage> {
 
   @override
   Widget build(BuildContext context) {
+    coins = context.watch<CoinRepository>();
+    table = coins.table;
+
     return Scaffold(
         appBar: AppBar(
           title:
@@ -43,7 +48,7 @@ class _CoinsPageState extends State<CoinsPage> {
                         child: Icon(Icons.check),
                       )
                     : SizedBox(
-                        child: Image.asset(table[coin].icon),
+                        child: Image.network(table[coin].icon),
                         width: 40,
                       ),
                 title: Text(

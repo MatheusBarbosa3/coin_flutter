@@ -46,9 +46,9 @@ class _CoinsDetailPageState extends State<CoinsDetailPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SizedBox(
-                    child: Image.asset(widget.coin.icon),
-                    width: 50,
+                  Image.network(
+                    widget.coin.icon,
+                    scale: 2.5,
                   ),
                   Container(
                     width: 10,
