@@ -1,7 +1,8 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:coin_flutter/pages/coins_page.dart';
-import 'package:coin_flutter/pages/settings_page.dart';
+import 'package:coin_flutter/pages/account_page.dart';
+import 'package:coin_flutter/pages/wallet_page.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -32,16 +33,19 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       body: PageView(
         controller: pageController,
-        children: [CoinsPage(), SettingsPage()],
+        children: [CoinsPage(), WalletPage(), AccountPage()],
         onPageChanged: setCurrentPage,
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentPage,
+        type: BottomNavigationBarType.fixed,
         items: [
           BottomNavigationBarItem(
               icon: Icon(Icons.view_list_outlined), label: 'Criptos'),
           BottomNavigationBarItem(
-              icon: Icon(Icons.settings_outlined), label: 'Configurações')
+              icon: Icon(Icons.account_balance_wallet), label: 'Carteira'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.account_circle_outlined), label: 'Conta')
         ],
         onTap: (page) {
           pageController.animateToPage(page,
