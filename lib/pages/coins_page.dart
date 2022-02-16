@@ -38,41 +38,44 @@ class _CoinsPageState extends State<CoinsPage> {
           title:
               Center(child: Text("Criptomoedas", textAlign: TextAlign.center)),
         ),
-        body: ListView.separated(
-            itemBuilder: (BuildContext context, int coin) {
-              return ListTile(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(12))),
-                leading: selected.contains(table[coin])
-                    ? CircleAvatar(
-                        child: Icon(Icons.check),
-                      )
-                    : SizedBox(
-                        child: Image.network(table[coin].icon),
-                        width: 40,
-                      ),
-                title: Text(
-                  table[coin].name,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
+        body: RefreshIndicator(
+          onRefresh: () => coins.checkPrice(),
+          child: ListView.separated(
+              itemBuilder: (BuildContext context, int coin) {
+                return ListTile(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(12))),
+                  leading: selected.contains(table[coin])
+                      ? CircleAvatar(
+                          child: Icon(Icons.check),
+                        )
+                      : SizedBox(
+                          child: Image.network(table[coin].icon),
+                          width: 40,
+                        ),
+                  title: Text(
+                    table[coin].name,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                ),
-                trailing: Text(real.format(table[coin].price)),
-                selected: selected.contains(table[coin]),
-                selectedTileColor: Colors.deepPurple[50],
-                onLongPress: () {
-                  setState(() {
-                    (selected.contains(table[coin]))
-                        ? selected.remove(table[coin])
-                        : selected.add(table[coin]);
-                  });
-                },
-                onTap: () => showDetails(table[coin]),
-              );
-            },
-            padding: EdgeInsets.all(16),
-            separatorBuilder: (_, __) => Divider(),
-            itemCount: table.length));
+                  trailing: Text(real.format(table[coin].price)),
+                  selected: selected.contains(table[coin]),
+                  selectedTileColor: Colors.deepPurple[50],
+                  onLongPress: () {
+                    setState(() {
+                      (selected.contains(table[coin]))
+                          ? selected.remove(table[coin])
+                          : selected.add(table[coin]);
+                    });
+                  },
+                  onTap: () => showDetails(table[coin]),
+                );
+              },
+              padding: EdgeInsets.all(16),
+              separatorBuilder: (_, __) => Divider(),
+              itemCount: table.length),
+        ));
   }
 }

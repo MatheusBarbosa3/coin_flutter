@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_final_fields, prefer_const_declarations, avoid_function_literals_in_foreach_calls
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:coin_flutter/database/db.dart';
@@ -11,11 +12,75 @@ import 'package:sqflite/sqflite.dart';
 class CoinRepository extends ChangeNotifier {
   List<Coin> _table = [];
   List<Coin> get table => _table;
+  late Timer interval;
 
   CoinRepository() {
     _setupCoinsTable();
     _setupDataTableCoins();
     _readCoinsTable();
+  }
+
+  checkPrice() async {
+    String uri = 'https://api.coinbase.com/v2/assets/prices?base=BRL';
+    final response = await http.get(Uri.parse(uri));
+
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      final List<dynamic> coins = json['data'];
+      Database db = await DB.instance.database;
+      Batch batch = db.batch();
+
+      _table.forEach((current) {
+        coins.forEach((fresh) {
+          if (current.baseId == fresh['base_id']) {
+            final coin = fresh['prices'];
+            final price = coin['latest_price'];
+            final timestamp = DateTime.parse(price['timestamp']);
+
+            batch.update(
+              'coins',
+              {
+                'price': coin['latest'],
+                'timestamp': timestamp.millisecondsSinceEpoch,
+                'changeHour': price['percent_change']['hour'].toString(),
+                'changeDay': price['percent_change']['day'].toString(),
+                'changeWeek': price['percent_change']['week'].toString(),
+                'changeMonth': price['percent_change']['month'].toString(),
+                'changeYear': price['percent_change']['year'].toString(),
+                'changeTotalPeriod': price['percent_change']['all'].toString()
+              },
+              where: 'baseId = ?',
+              whereArgs: [current.baseId],
+            );
+          }
+        });
+      });
+      await batch.commit(noResult: true);
+      await _readCoinsTable();
+    }
+  }
+
+  getCoinHistory(Coin coin) async {
+    final response = await http.get(
+      Uri.parse(
+        'https://api.coinbase.com/v2/assets/prices/${coin.baseId}?base=BRL',
+      ),
+    );
+    List<Map<String, dynamic>> prices = [];
+
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      final Map<String, dynamic> coin = json['data']['prices'];
+
+      prices.add(coin['hour']);
+      prices.add(coin['day']);
+      prices.add(coin['week']);
+      prices.add(coin['month']);
+      prices.add(coin['year']);
+      prices.add(coin['all']);
+    }
+
+    return prices;
   }
 
   _readCoinsTable() async {
@@ -44,8 +109,8 @@ class CoinRepository extends ChangeNotifier {
 
   _coinsTableIsEmpty() async {
     Database db = await DB.instance.database;
-    List resultados = await db.query('coins');
-    return resultados.isEmpty;
+    List results = await db.query('coins');
+    return results.isEmpty;
   }
 
   _setupDataTableCoins() async {
