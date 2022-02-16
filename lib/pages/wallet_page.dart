@@ -40,19 +40,32 @@ class _WalletPageState extends State<WalletPage> {
               padding: EdgeInsets.only(top: 35, bottom: 8),
               child: Text(
                 'Valor da carteira',
-                style: TextStyle(color: Colors.deepPurple, fontSize: 20),
+                style: TextStyle(color: Colors.deepPurple, fontSize: 18),
               ),
             ),
             Text(
               real.format(totalWallet),
               style: TextStyle(
                 color: Colors.deepPurple,
-                fontSize: 38,
+                fontSize: 35,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -1.5,
               ),
             ),
             loadGraphic(),
+            Container(
+              child: Text(
+                'Histórico de compras',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.teal,
+                ),
+              ),
+              padding: EdgeInsets.all(12),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(color: Colors.teal.withOpacity(0.06)),
+            ),
+            loadHistory(),
           ],
         ),
       ),
@@ -170,5 +183,23 @@ class _WalletPageState extends State<WalletPage> {
               ),
             ],
           );
+  }
+
+  loadHistory() {
+    final history = account.history;
+    final date = DateFormat('dd/MM/yyyy - HH:mm');
+    List<Widget> widgets = [];
+
+    for (var operation in history) {
+      widgets.add(ListTile(
+        title: Text(operation.coin.name),
+        subtitle: Text(date.format(operation.dateOperation)),
+        trailing: Text(real.format(operation.coin.price * operation.amount)),
+      ));
+      widgets.add(Divider());
+    }
+    return Column(
+      children: widgets.reversed.toList(),
+    );
   }
 }
