@@ -23,7 +23,7 @@ class DB {
     );
   }
 
-  _onCreate(db, versao) async {
+  _onCreate(db, version) async {
     await db.execute(_account);
     await db.execute(_wallet);
     await db.execute(_history);

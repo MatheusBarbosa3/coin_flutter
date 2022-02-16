@@ -1,9 +1,12 @@
 // ignore_for_file: prefer_const_constructors, unused_local_variable, avoid_unnecessary_containers
 
 import 'package:coin_flutter/models/coin.dart';
+import 'package:coin_flutter/repositories/account_repository.dart';
+import 'package:coin_flutter/widgets/graphic_history.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 // ignore: must_be_immutable
 class CoinsDetailPage extends StatefulWidget {
@@ -20,9 +23,21 @@ class _CoinsDetailPageState extends State<CoinsDetailPage> {
   final _form = GlobalKey<FormState>();
   final _value = TextEditingController();
   double amount = 0;
+  late AccountRepository account;
+  Widget graphic = Container();
+  bool graphicLoaded = false;
 
-  buy() {
+  getGraphic() {
+    if (!graphicLoaded) {
+      graphic = GraphicHistory(coin: widget.coin);
+      graphicLoaded = true;
+    }
+    return graphic;
+  }
+
+  buy() async {
     if (_form.currentState!.validate()) {
+      await account.buy(widget.coin, double.parse(_value.text));
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content:
@@ -32,11 +47,13 @@ class _CoinsDetailPageState extends State<CoinsDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    account = Provider.of<AccountRepository>(context, listen: false);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.coin.name),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: EdgeInsets.all(24),
         child: Column(
           children: [
@@ -65,22 +82,28 @@ class _CoinsDetailPageState extends State<CoinsDetailPage> {
                 ],
               ),
             ),
-            SizedBox(
-              width: MediaQuery.of(context).size.width,
-              child: Container(
-                child: Text(
-                  '$amount ${widget.coin.initials}',
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Colors.teal,
+            getGraphic(),
+            (amount > 0)
+                ? SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    child: Container(
+                      child: Text(
+                        '$amount ${widget.coin.initials}',
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: Colors.teal,
+                        ),
+                      ),
+                      margin: EdgeInsets.only(bottom: 24),
+                      padding: EdgeInsets.all(12),
+                      alignment: Alignment.center,
+                      decoration:
+                          BoxDecoration(color: Colors.teal.withOpacity(0.06)),
+                    ),
+                  )
+                : Container(
+                    margin: EdgeInsets.only(bottom: 24),
                   ),
-                ),
-                margin: EdgeInsets.only(bottom: 24),
-                padding: EdgeInsets.all(12),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(color: Colors.teal.withOpacity(0.06)),
-              ),
-            ),
             Form(
               key: _form,
               child: TextFormField(
@@ -102,7 +125,10 @@ class _CoinsDetailPageState extends State<CoinsDetailPage> {
                 validator: (value) {
                   if (value!.isEmpty) {
                     return 'Informe o valor';
+                  } else if (double.parse(value) > account.balance) {
+                    return 'Saldo insuficiente';
                   }
+                  return null;
                 },
                 onChanged: (value) {
                   setState(() {
