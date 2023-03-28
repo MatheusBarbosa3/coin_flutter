@@ -1,4 +1,4 @@
-# coin_flutter
+# Coin flutter
 
 A new Flutter project.
 
